@@ -3,24 +3,29 @@
 ---
 
 ## Step 1: Create Project Folders
+
 - Create two folders at the root level:
   - `frontend`
   - `services`
 
 ## Step 2: Create Service Folders
+
 - Inside the `services` folder, create the following folders:
   - `auth`
   - `user`
 
 ## Step 3: Navigate to Auth Service
+
 - Open the terminal and run the following command:
 
 ```bash
 cd services/auth
 ```
+
 ## AUTH SERVICE
 
 ## Step 4: Initialize the Application
+
 - Initialize the auth service application by running the following command:
 
 ```bash
@@ -28,6 +33,7 @@ npm init -y
 ```
 
 ## Step 5: Install TypeScript Globally
+
 - Install TypeScript globally on your system:
 
 ```bash
@@ -35,6 +41,7 @@ npm i -g typescript
 ```
 
 ## Step 6: Initialize TypeScript
+
 - Initialize TypeScript configuration for the auth service:
 
 ```bash
@@ -42,6 +49,7 @@ npx tsc --init
 ```
 
 ## Step 7: Update tsconfig.json
+
 - After initializing TypeScript, a tsconfig.json file will be created.
 
 - Update the file with the following configuration:
@@ -62,6 +70,7 @@ npx tsc --init
 ```
 
 ## Step 8: Create Source Folder and Update Package Configuration
+
 - Create a folder named `src` inside the `auth` folder.
 - Then edit the `package.json` file to include the following field:
 
@@ -70,6 +79,7 @@ npx tsc --init
 ```
 
 ## Step 9: Install Required Packages
+
 - In the `auth` microservice folder, install the necessary packages by running the following command:
 
 ```bash
@@ -78,11 +88,13 @@ npm i -D @types/express @types/dotenv @types/bcrypt @types/jsonwebtoken typescri
 ```
 
 ## Step 10: Create Source Files
+
 - Inside the `src` folder, create two files named:
   - `index.ts`
   - `app.ts`
 
 ## Step 11: Create the Express Application
+
 - In `app.ts`, create and export the Express app:
 
 ```js
@@ -94,6 +106,7 @@ export default app;
 ```
 
 ## Step 12: Import and Start the Server
+
 - In `index.ts`, import the Express app and start the server:
 
 ```js
@@ -110,6 +123,7 @@ app.listen(port, () => {
 ```
 
 ## Step 13: Create Environment File
+
 - In the root of the `auth` service directory, create a `.env` file.
 - Add the following:
 
@@ -118,6 +132,7 @@ PORT=5000
 ```
 
 ## Step 14: Generate the Build
+
 - To compile the TypeScript code and generate the build for the auth service, run the following command:
 
 ```bash
@@ -125,6 +140,7 @@ tsc
 ```
 
 ## Step 15: Add Scripts to `package.json`
+
 - Edit the `package.json` file and add the following scripts:
 
 ```json
@@ -134,15 +150,18 @@ tsc
 ```
 
 ## Note on Script Commands
+
 - **build command**: Installs dependencies and generates the build of the microservice.
 - **start command**: Runs the server from the `dist` (build) folder.
 - **dev command**: Uses "concurrently" to run two commands at once: compiling TypeScript(generating the build) and running the server simultaneously.
 
 ## Step 16: Create a Neon Database Project
+
 - Go to Neon DB.
 - Create a new project named `job-portal`.
 
 ## Step 17: Add Database URL to Environment File
+
 - After creating the project, click on "Connect to your database."
 - Copy the connection string URL.
 - In your auth service `.env` file, add:
@@ -152,6 +171,7 @@ DB_URL=<url>
 ```
 
 ## Step 18: Install Neon Database Client
+
 - To connect to your serverless Neon PostgreSQL DB, install the required package:
 
 ```bash
@@ -159,6 +179,7 @@ npm i @neondatabase/serverless
 ```
 
 ## Step 19: Set Up Database Connection
+
 - Inside the `src` folder, create a `utils` folder.
 - In the `utils` folder, create a file named `db.ts`.
 - Add the following code to establish the database connection:
@@ -175,6 +196,7 @@ export const sql = neon(dbURL);
 ```
 
 ## Step 20: Initialize Database Connection
+
 - In `index.ts`, add a method to initialize the database tables:
 
 ```js
@@ -190,7 +212,7 @@ async function initDB() {
       END IF;
       END$$;
     `;
-    
+
     await sql`
       CREATE TABLE IF NOT EXISTS users (
         user_id SERIAL PRIMARY KEY,
@@ -208,14 +230,14 @@ async function initDB() {
         subscription TIMESTAMP
       );
     `;
-    
+
     await sql`
       CREATE TABLE IF NOT EXISTS skills (
         skill_id SERIAL PRIMARY KEY,
         name VARCHAR(100) NOT NULL UNIQUE
       );
     `;
-    
+
     await sql`
       CREATE TABLE IF NOT EXISTS user_skills (
         user_id INTEGER NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
@@ -223,7 +245,7 @@ async function initDB() {
         PRIMARY KEY (user_id, skill_id)
       );
     `;
-    
+
     console.log("✅ Database tables checked/created successfully");
   } catch (error) {
     console.log("❌ Error initiating database:", error);
@@ -242,6 +264,7 @@ initDB().then(() => {
 ```
 
 ## Step 21: Create Auth Routes
+
 - Inside the `src` folder, create a `routes` folder.
 - Inside `routes`, create a file named `auth.ts` with the following:
 
@@ -254,6 +277,7 @@ export default router;
 ```
 
 ## Step 22: Register Routes in App
+
 - In `app.ts`, import the auth routes and use them:
 
 ```js
@@ -266,3 +290,68 @@ app.use("/api/auth", authRoutes);
 
 export default app;
 ```
+
+## Step 23: Create Controllers for Auth
+
+- Inside the `src` folder (of the auth service), create a `controllers` folder.
+- Inside `controllers`, create a file named `auth.ts`.
+
+## Step 24: Create Error Handler Utility
+
+- Inside the `utils` folder (in `src`), create a file named `errorHandler.ts`:
+
+```js
+export default class ErrorHandler extends Error {
+  statusCode: number;
+
+  constructor(statusCode: number, message: string) {
+    super(message);
+    this.statusCode = statusCode;
+    Error.captureStackTrace(this, this.constructor);
+  }
+}
+```
+
+## Step 25: Create Try-Catch Utility
+
+- Inside the `utils` folder (in `src`), create a file named `TryCatch.ts`:
+
+```js
+import { NextFunction, Request, RequestHandler, Response } from "express";
+import ErrorHandler from "./errorHandler.js";
+
+export const TryCatch = (controller: (req: Request, res: Response, next: NextFunction) => Promise<any>): RequestHandler => async (req, res, next) => {
+  try {
+    await controller(req, res, next);
+  } catch (error: any) {
+    if (error instanceof ErrorHandler) {
+      return res.status(error.statusCode).json({ message: error.message });
+    }
+    res.status(500).json({ message: error.message });
+  }
+};
+```
+
+## Step 26: Start Register User API
+
+- In `controllers/auth.ts`, import the TryCatch utility:
+
+```js
+import { TryCatch } from "../utils/TryCatch.js";
+
+export const registerUser = TryCatch(async (req, res, next) => {
+  // API logic will go here
+});
+```
+
+## Step 27: Add Register Route
+
+- In `routes/auth.ts`, include the register user endpoint:
+
+```js
+import { registerUser } from "../controllers/auth.js";
+
+router.post("/register", registerUser);
+```
+
+# TO BE CONTINUED FROM 1:21:00
