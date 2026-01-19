@@ -354,4 +354,59 @@ import { registerUser } from "../controllers/auth.js";
 router.post("/register", registerUser);
 ```
 
-# TO BE CONTINUED FROM 1:21:00
+## Step 28: Add JSON Middleware
+
+- In `app.ts`, after `const app = express()`, include:
+
+```js
+app.use(express.json());
+```
+
+## Step 29: Add Register User Logic
+
+- In `controllers/auth.ts`, implement the logic:
+
+```js
+import { sql } from "../utils/db.js";
+import ErrorHandler from "../utils/errorHandler.js";
+import bcrypt from "bcrypt";
+
+export const registerUser = TryCatch(async (req, res, next) => {
+  const { name, email, password, phoneNumber, role, bio } = req.body;
+
+  if (!name || !email || !password || !phoneNumber || !role) {
+    throw new ErrorHandler(400, "Please fill all details");
+  }
+
+  const existingUsers =
+    await sql`SELECT user_id FROM users WHERE email = ${email}`;
+
+  if (existingUsers.length > 0) {
+    throw new ErrorHandler(409, "User with this email already exists");
+  }
+
+  const hashPassword = await bcrypt.hash(password, 10);
+
+  let registeredUser;
+
+  if (role === "recruiter") {
+    const [user] = await sql`
+    INSERT INTO users (name, email, password, phone_number, role)
+    VALUES (${name}, ${email}, ${hashedPassword}, ${phoneNumber}, ${role})
+    RETURNING user_id, name, email, phone_number, role, created_at;
+  `;
+    registeredUser = user;
+  } else if (role === "jobseeker") {
+    const [user] = await sql`
+    INSERT INTO users (name, email, password, phone_number, role)
+    VALUES (${name}, ${email}, ${hashedPassword}, ${phoneNumber}, ${role})
+    RETURNING user_id, name, email, phone_number, role, created_at;
+  `;
+    registeredUser = user;
+  }
+});
+```
+
+<!-- You have to setupo multer now -->
+
+<!-- Continue from 1:32:00 -->
