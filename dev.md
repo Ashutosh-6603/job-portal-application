@@ -1,5 +1,7 @@
 # Process on how to start servers.
 
+## To start the auth service
+
 ## Go to the terminal and run the command
 
 ```bash
@@ -12,4 +14,18 @@ cd /services/auth
 npm run dev
 ```
 
-###### This will start the auth service and then proceed and make changes accordingly
+---
+
+## To start the utils service
+
+## Go to the terminal and run the command
+
+```bash
+cd /services/utils
+```
+
+- then run the command
+
+```bash
+npm run dev
+```

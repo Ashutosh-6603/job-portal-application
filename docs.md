@@ -496,3 +496,129 @@ export default getBuffer;
 - This approach allows uploading files directly to Cloudinary without saving them to the local filesystem, making it efficient and suitable for serverless or microservice-based architectures.
 
 ## UTILS SERVICE
+
+## Step 38: Create Utils Microservice
+
+- Inside the `services` folder, create a new microservice named `utils`.
+- Navigate to the `utils` folder in the terminal.
+- Initialize the Node.js application by running:
+
+```bash
+npm init -y
+```
+
+## Step 39: Copy TypeScript Configuration
+
+- Copy the `tsconfig.json` file from the `auth` service.
+- Paste the copied `tsconfig.json` file inside the `utils` microservice directory.
+
+## Step 40: Install Required Packages in Utils Microservice
+
+- Inside the `utils` microservice directory, install the required packages by running the following command in the terminal:
+
+```bash
+npm i express dotenv cloudinary cors
+```
+
+## Step 41: Install Development Dependencies in Utils Microservice
+
+- Inside the `utils` microservice directory, install the TypeScript typings and development tools by running the following command:
+
+```bash
+npm i -D @types/express @types/dotenv @types/cors typescript nodemon concurrently
+```
+
+## Step 42: Create Source Entry File in Utils Microservice
+
+- Inside the `utils` microservice directory, create a folder named `src`.
+- Inside the `src` folder, create a file named `index.ts`.
+
+## Step 43: Initialize Utils Service Server
+
+- Inside the `src/index.ts` file of the `utils` microservice, add the following code:
+
+```js
+import express from "express";
+import dotenv from "dotenv";
+
+dotenv.config();
+
+const app = express();
+
+const PORT = process.env.PORT || 5001;
+
+app.listen(PORT, () => {
+  console.log(`Utils Service is running on port ${PORT}`);
+});
+```
+
+## Step 44: Create Environment File for Utils Microservice
+
+- Inside the `utils` microservice directory, create a `.env` file.
+- Add the following configuration:
+
+```env
+PORT=5001
+```
+
+## Step 45: Add NPM Scripts to Utils Microservice
+
+- Copy the NPM scripts from the `auth` service `package.json`.
+- Paste the same scripts into the `package.json` file of the `utils` microservice.
+
+## Step 46: Enable ES Modules in Utils Microservice
+
+- In the `package.json` file of the `utils` microservice, add the following field:
+
+```json
+"type": "module"
+```
+
+## Step 47: Generate Build for Utils Microservice
+
+- Inside the `utils` microservice directory, run the following command to generate the `dist` folder:
+
+```bash
+tsc
+```
+
+## Step 48: Create Routes File
+
+- Inside the `src` folder of the `utils` microservice, create a file named `routes.ts`.
+
+## Step 49: Initialize Routes File
+
+- Inside the `src/routes.ts` file of the `utils` microservice, add the following code:
+
+```js
+import express from "express";
+
+const router = express.Router();
+
+export default router;
+```
+
+## Step 50: Register Routes in Utils Service
+
+- Inside the `src/index.ts` file of the `utils` microservice, import and use the routes:
+
+```js
+import routes from "./routes.js";
+
+app.use("/api/utils", routes);
+```
+
+## Step 51: Add Middlewares to Utils Service
+
+- In the `src/index.ts` file of the `utils` microservice, import and configure the required middlewares.
+
+```js
+import cors from "cors";
+
+app.use(cors());
+
+app.use(express.json({ limit: "50mb" }));
+app.use(express.urlencoded({ limit: "50mb", extended: true }));
+```
+
+<!-- SETUP FOR CLOUDINARY FROM 1:48:11 -->
