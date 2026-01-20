@@ -397,6 +397,9 @@ export const registerUser = TryCatch(async (req, res, next) => {
   `;
     registeredUser = user;
   } else if (role === "jobseeker") {
+    // const file = req.file
+    // multer setup required
+
     const [user] = await sql`
     INSERT INTO users (name, email, password, phone_number, role)
     VALUES (${name}, ${email}, ${hashedPassword}, ${phoneNumber}, ${role})
@@ -407,6 +410,89 @@ export const registerUser = TryCatch(async (req, res, next) => {
 });
 ```
 
-<!-- You have to setupo multer now -->
+## Step 30: Install Multer for File Uploads
 
-<!-- Continue from 1:32:00 -->
+- Run the following commands:
+  - `npm i multer`
+  - `npm i -D @types/multer`
+
+- Restart the server inside the auth service
+  - `npm run dev`
+
+## Step 31: Set Up Multer Middleware
+
+- Inside the `src` folder, create a `middleware` folder.
+- Inside the `middleware` folder, create a file named `multer.ts`.
+
+## Step 32: Configure Multer in `multer.ts`
+
+- What is this setup?  
+  Multer is a middleware to handle file uploads in Node.js. By setting `memoryStorage()`, we store the file in memory as a buffer (not directly on disk). This is useful for processing files on-the-fly (e.g., validating or uploading to a cloud service) rather than storing them locally.
+- In `multer.ts`, add the following code:
+
+```js
+import multer from "multer";
+
+const storage = multer.memoryStorage();
+
+const uploadFile = multer({ storage }).single("file");
+
+export default uploadFile;
+```
+
+## Step 33: Use Multer in Routes
+
+- In the `auth.ts` file inside the `routes` folder, include the multer middleware:
+  - Add `import uploadFile from "../middleware/multer.js";` at the top.
+  - For the register route, use `uploadFile` before `registerUser`:
+
+```js
+import uploadFile from "../middleware/multer.js";
+
+router.post("/register", uploadFile, registerUser);
+```
+
+## Step 34: Access the Uploaded File in the Controller
+
+- In the `auth.ts` file inside the `controllers` folder, within the `else if (role === "jobseeker")` block of the `registerUser` API:
+
+```js
+const file = req.file;
+```
+
+## Step 35: Install Data URI Package
+
+- Install the required package by running the following command in the terminal:
+
+```bash
+npm i datauri
+```
+
+## Step 36: Create Buffer Utility
+
+- Inside the `utils` folder, create a file named `buffer.ts`.
+- Add the following code to convert uploaded files into buffers:
+
+```js
+import DataUriParser from "datauri/parser.js";
+import path from "path";
+
+const getBuffer = (file: any) => {
+  const parser = new DataUriParser();
+
+  const extName = path.extname(file.originalname).toString();
+
+  return parser.format(extName, file.buffer);
+};
+
+export default getBuffer;
+```
+
+- Multer is configured to use `memoryStorage`, which means uploaded files are available as in-memory buffers (`file.buffer`).
+- Cloudinary does not accept raw buffers directly for uploads.
+- Cloudinary expects files in the `Data URI` format.
+- `datauri/parser` converts the in-memory buffer into a Data URI string.
+- `path.extname()` extracts the file extension from the original filename so Cloudinary can correctly detect the file type.
+- This approach allows uploading files directly to Cloudinary without saving them to the local filesystem, making it efficient and suitable for serverless or microservice-based architectures.
+
+## UTILS SERVICE
